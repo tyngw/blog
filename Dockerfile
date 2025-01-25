@@ -1,5 +1,5 @@
 FROM golang
 
-RUN go install github.com/x-motemen/blogsync@latest
+RUN go get github.com/x-motemen/blogsync
 
 ENTRYPOINT [ "blogsync" ]
