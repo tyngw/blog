@@ -1,4 +1,6 @@
 **/blogsync.yaml
 .env
 /.idea/
-/entries/tyngw.hatenablog.com/entry/_draft/
+blogsync*.yml
+# If you are using a remote repository, comment out the following
+# /entries/tyngw.hatenablog.com/entry/_draft/
