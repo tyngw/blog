@@ -5,7 +5,7 @@ on: create
 jobs:
   create-blog:
     name: Create draft blog
-    if: ${{ contains(github.ref, 'create') }}
+    if: ${{ github.ref == 'refs/heads/create' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -42,13 +42,24 @@ jobs:
       run: |
         ~/go/bin/blogsync post -draft ${DOMAIN} < draft.md
 
-    - name: Trigger pull from hatena blog
-      uses: actions/github-script@v4
-      with:
-        script: |
-          github.actions.createWorkflowDispatch({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            workflow_id: 'pull.yml',
-            ref: context.ref
-          })
+    - name: Pull from Hatena Blog
+      env:
+        DOMAIN: ${{ secrets.DOMAIN }}
+      run: |
+        ~/go/bin/blogsync pull
+
+    - name: Commit and push changes to master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git checkout master
+        git add .
+        if ! git diff-index --quiet HEAD; then
+          git commit -m "Update from Hatena Blog"
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git master
+        else
+          echo "No changes to commit"
+        fi
+        git branch -d create
