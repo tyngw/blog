@@ -40,17 +40,17 @@ jobs:
       run: |
         ~/go/bin/blogsync pull
 
-    - name: Commit and push changes to publish
+    - name: Commit and push changes to master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name 'github-actions[bot]'
         git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-        git checkout publish
+        git checkout master
         git add .
         if ! git diff-index --quiet HEAD; then
           git commit -m "Update from Hatena Blog"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git publish
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git master
         else
           echo "No changes to commit"
         fi
