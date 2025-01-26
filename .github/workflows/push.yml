@@ -46,6 +46,17 @@ jobs:
         | grep entries/${DOMAIN}/entry \
         | xargs -t -n1 ~/go/bin/blogsync push
 
+    - name: Merge draft into publish and delete draft branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git checkout publish
+        git merge draft
+        git push origin publish
+        git push origin --delete draft
+
     # - name: notify to slack
     #   uses: mm0202/action_slack-notify@master
     #   if: always()
