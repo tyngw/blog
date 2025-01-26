@@ -9,7 +9,7 @@ docker-compose run --rm blogsync post --title=draft --draft --custom-path=${path
 ```
 
 ## 既に投稿した記事を修正する場合
-`publish`ブランチにpushしてください
+`draft`ブランチにpushしてください
 
 ## はてなブログから`publish`ブランチに記事を同期する場合
 Workflow `pull from hatena blog` を実行してください
