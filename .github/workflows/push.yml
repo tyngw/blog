@@ -29,11 +29,6 @@ jobs:
 
     - run: git fetch origin master
 
-    - name: Install dependencies
-      run: |
-        go get github.com/urfave/cli/v2
-        go get log/slog
-
     - name: Setup blogsync
       env:
         BSY: ${{ secrets.BSY }}
