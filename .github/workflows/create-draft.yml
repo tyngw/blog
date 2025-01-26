@@ -62,4 +62,8 @@ jobs:
         else
           echo "No changes to commit"
         fi
+        
+    - name: Delete local and remote create branch
+      run: |
         git branch -d create
+        git push origin --delete create
