@@ -36,8 +36,19 @@ jobs:
         fi
         echo -e ${BSY} > blogsync.yaml
 
-    - name: push
+    - name: post draft
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
         ~/go/bin/blogsync post -draft ${DOMAIN} < draft.md
+
+    - name: Trigger pull from hatena blog
+      uses: actions/github-script@v4
+      with:
+        script: |
+          github.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'pull.yml',
+            ref: context.ref
+          })
