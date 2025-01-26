@@ -44,7 +44,7 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git checkout test-branch
+        git checkout master
         git add .
         git commit -m "Update from Hatena Blog"
-        git push origin test-branch
+        git push origin master
