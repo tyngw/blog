@@ -6,11 +6,6 @@ on:
       - master
     paths:
       - 'entries/**'
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'entries/**'
 
 jobs:
   push:
