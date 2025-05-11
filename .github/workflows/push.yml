@@ -42,9 +42,13 @@ jobs:
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} \
-        | grep entries/${DOMAIN}/entry \
-        | xargs -r -n1 ~/go/bin/blogsync push
+        FROM_COMMIT=${{ github.event.before }}
+        if [ -z "$FROM_COMMIT" ] || ! git cat-file -e "$FROM_COMMIT" 2>/dev/null; then
+          FROM_COMMIT=HEAD^
+        fi
+        git diff --name-only "$FROM_COMMIT" ${{ github.sha }} \
+          | grep entries/${DOMAIN}/entry \
+          | xargs -r -n1 ~/go/bin/blogsync push
 
     # - name: notify to slack
     #   uses: mm0202/action_slack-notify@master
