@@ -15,6 +15,9 @@ hatena blogに新しい下書き記事をpostした後、`master`ブランチに
 git fetch --prune
 ```
 
+## blogsyncで記事をはてなブログにpushする場合
+`master`ブランチにマージされると、blogsyncによりはてなブログにpushされます。
+
 ## 下書き記事を公開する場合
 [人力で頑張る](https://blog.hatena.ne.jp/tyngw/tyngw.hatenablog.com/drafts)のです。
 
