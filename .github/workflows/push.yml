@@ -28,6 +28,8 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
 
     - name: Setup blogsync
       env:
@@ -44,7 +46,12 @@ jobs:
       run: |
         FROM_COMMIT=${{ github.event.before }}
         if [ -z "$FROM_COMMIT" ] || ! git cat-file -e "$FROM_COMMIT" 2>/dev/null; then
-          FROM_COMMIT=HEAD^
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            FROM_COMMIT=HEAD^
+          else
+            echo "No previous commit found, skipping blogsync push."
+            exit 0
+          fi
         fi
         git diff --name-only "$FROM_COMMIT" ${{ github.sha }} \
           | grep entries/${DOMAIN}/entry \
