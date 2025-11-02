@@ -1,29 +1,38 @@
 name: create draft blog
 
-on: create
+on:
+  push:
+    branches:
+      - create
+
+concurrency:
+  group: hatena-sync
+  cancel-in-progress: false
 
 jobs:
   create-blog:
     name: Create draft blog
-    if: ${{ github.ref == 'refs/heads/create' }}
     runs-on: ubuntu-latest
     steps:
 
     - name: Set up Go 1.21
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
-        go-version: 1.21
+        go-version: '1.21'
       id: go
 
     - uses: actions/cache@v4
       with:
         path: ~/go/bin/
-        key: ${{ runner.os }}-go-blogsync-200423.0756
+        key: ${{ runner.os }}-go-blogsync-${{ hashFiles('**/go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-go-blogsync-200423.0756
+          ${{ runner.os }}-go-blogsync-
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
 
     - run: git fetch origin master
 
@@ -48,22 +57,41 @@ jobs:
       run: |
         ~/go/bin/blogsync pull
 
-    - name: Commit and push changes to master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check for changes
+      id: check_changes
       run: |
-        git config --global user.name 'github-actions[bot]'
-        git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-        git checkout master
         git add .
-        if ! git diff-index --quiet HEAD; then
-          git commit -m "Update from Hatena Blog"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git master
+        if git diff-index --quiet HEAD; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
         else
-          echo "No changes to commit"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "Changes detected"
         fi
-        
-    - name: Delete local and remote create branch
+
+    - name: Create Pull Request
+      if: steps.check_changes.outputs.has_changes == 'true'
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Add new draft article [bot]"
+        title: "Add new draft article from create branch"
+        body: |
+          新しい下書き記事をはてなブログに投稿し、同期しました。
+
+          内容を確認してマージしてください。
+
+          - 自動生成されたPRです
+          - `create`ブランチから作成されました
+        branch: bot/new-draft-from-create
+        base: master
+        delete-branch: true
+        labels: |
+          automated
+          hatena-sync
+          new-draft
+
+    - name: Delete create branch
+      if: always()
       run: |
-        git branch -d create
-        git push origin --delete create
+        git push origin --delete create || echo "Failed to delete create branch, it may not exist"

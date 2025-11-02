@@ -1,33 +1,39 @@
 name: push to hatena blog
 
-on: 
+on:
   push:
     branches:
       - master
     paths:
       - 'entries/**'
 
+concurrency:
+  group: hatena-sync
+  cancel-in-progress: false
+
 jobs:
   push:
     name: push
     runs-on: ubuntu-latest
+    # ボットによるコミットをスキップして無限ループを防止
+    if: ${{ !contains(github.event.head_commit.message, '[bot]') }}
     steps:
 
     - name: Set up Go 1.21
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
-        go-version: 1.21
+        go-version: '1.21'
       id: go
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ~/go/bin/
-        key: ${{ runner.os }}-go-blogsync-200423.0756
+        key: ${{ runner.os }}-go-blogsync-${{ hashFiles('**/go.sum') }}
         restore-keys: |
-          ${{ runner.os }}-go-blogsync-200423.0756
+          ${{ runner.os }}-go-blogsync-
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         fetch-depth: 2
 
@@ -44,6 +50,7 @@ jobs:
       env:
         DOMAIN: ${{ secrets.DOMAIN }}
       run: |
+        set -e
         FROM_COMMIT=${{ github.event.before }}
         if [ -z "$FROM_COMMIT" ] || ! git cat-file -e "$FROM_COMMIT" 2>/dev/null; then
           if git rev-parse HEAD^ >/dev/null 2>&1; then
@@ -53,9 +60,25 @@ jobs:
             exit 0
           fi
         fi
-        git diff --name-only "$FROM_COMMIT" ${{ github.sha }} \
-          | grep entries/${DOMAIN}/entry \
-          | xargs -r -n1 ~/go/bin/blogsync push
+
+        CHANGED_FILES=$(git diff --name-only "$FROM_COMMIT" ${{ github.sha }} | grep "entries/${DOMAIN}/entry" || true)
+
+        if [ -z "$CHANGED_FILES" ]; then
+          echo "No entry files changed, skipping blogsync push."
+          exit 0
+        fi
+
+        echo "Pushing the following files to Hatena Blog:"
+        echo "$CHANGED_FILES"
+
+        echo "$CHANGED_FILES" | xargs -n1 ~/go/bin/blogsync push
+
+        if [ $? -eq 0 ]; then
+          echo "Successfully pushed to Hatena Blog"
+        else
+          echo "Failed to push to Hatena Blog"
+          exit 1
+        fi
 
     # - name: notify to slack
     #   uses: mm0202/action_slack-notify@master
