@@ -38,12 +38,13 @@ GitHubとはてなブログを連携するための環境です。
 
 3. PRを確認してmasterにマージ
 
-### 既存の記事を編集する
+### 既存の記事を編集する（下書きを含む）
 
 1. 作業ブランチを作成:
    ```bash
    git checkout -b feature/update-article
    # entries/配下のファイルを編集
+   # 下書き記事も公開記事も同じ方法で編集可能
    git add entries/
    git commit -m "Update article content"
    git push origin feature/update-article
@@ -52,6 +53,9 @@ GitHubとはてなブログを連携するための環境です。
 2. GitHubでプルリクエストを作成
 
 3. レビュー後、masterにマージすると自動的にはてなブログに反映
+   - 下書き記事の場合: 下書きとして更新されます
+   - 公開記事の場合: 公開記事として更新されます
+   - 記事の状態（下書き/公開）は、ファイル内の`Draft`フィールドで制御されます
 
 ### はてなブログから記事を同期する
 
