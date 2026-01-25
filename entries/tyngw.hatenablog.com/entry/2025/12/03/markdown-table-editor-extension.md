@@ -33,7 +33,7 @@ AI Coding Agentによって、人類はマークアップ言語であるMarkdown
 
 [f:id:tyngw:20251203084101w:plain]
 
-すでに、Visual Studio Codeの拡張機能として公開しているので、お使いいただくことができます。((もちろん、VSCodeをforkしたCursorなどでも使えます))  
+すでに、Visual Studio Codeの拡張機能として公開しているので、お使いいただくことができます。((もちろん、VSCodeをforkしたCursorなどでも使えますが、大人の事情でまだマーケットプレイスからのインストールはできないようなので、リポジトリをcloneしてパッケージ化してください))  
 [Interactive Markdown Table Editor - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=tyngw.interactive-markdown-table-editor)
 
 ここで機能紹介をしても仕方ないのですが、基本的な編集はもちろん、以下の機能を実装しています。  
